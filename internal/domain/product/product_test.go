@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/keshav/transactflow/internal/domain/product"
+	"github.com/keshav-077/transactflow/internal/domain/product"
 )
 
 // mockInventoryStore is an in-memory InventoryStore for testing.

@@ -205,7 +205,7 @@ payment_captured → confirmed → fulfilled
 
 ```bash
 # 1️⃣ Clone the repository
-git clone https://github.com/keshav/transactflow.git
+git clone https://github.com/keshav-077/transactflow.git
 cd transactflow
 
 # 2️⃣ Start infrastructure services
@@ -523,7 +523,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - 🌐 Portfolio: [Your Portfolio URL]
 - 💼 LinkedIn: [Your LinkedIn]
-- 🐙 GitHub: [@keshav](https://github.com/keshav)
+- 🐙 GitHub: [@keshav-077](https://github.com/keshav-077)
 - 📧 Email: keshav@example.com
 
 ---

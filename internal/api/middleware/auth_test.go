@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/keshav/transactflow/internal/api/middleware"
-	"github.com/keshav/transactflow/internal/domain/user"
+	"github.com/keshav-077/transactflow/internal/api/middleware"
+	"github.com/keshav-077/transactflow/internal/domain/user"
 )
 
 // mockUserStore implements user.Store for middleware tests.

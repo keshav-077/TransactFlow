@@ -10,10 +10,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 
-	"github.com/keshav/transactflow/internal/domain/order"
-	"github.com/keshav/transactflow/internal/domain/payment"
-	"github.com/keshav/transactflow/internal/domain/product"
-	"github.com/keshav/transactflow/internal/queue"
+	"github.com/keshav-077/transactflow/internal/domain/order"
+	"github.com/keshav-077/transactflow/internal/domain/payment"
+	"github.com/keshav-077/transactflow/internal/domain/product"
+	"github.com/keshav-077/transactflow/internal/queue"
 )
 
 const refundWorkerGroup = "refund-workers"

@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 
-	"github.com/keshav/transactflow/internal/domain/product"
+	"github.com/keshav-077/transactflow/internal/domain/product"
 )
 
 const (

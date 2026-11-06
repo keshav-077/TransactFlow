@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 
-	"github.com/keshav/transactflow/internal/domain/payment"
-	"github.com/keshav/transactflow/internal/domain/reconciliation"
+	"github.com/keshav-077/transactflow/internal/domain/payment"
+	"github.com/keshav-077/transactflow/internal/domain/reconciliation"
 )
 
 // ── mock payment store ──────────────────────────────────────────────────────

@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/keshav/transactflow/internal/domain/user"
+	"github.com/keshav-077/transactflow/internal/domain/user"
 )
 
 // UserStore implements user.Store against PostgreSQL.

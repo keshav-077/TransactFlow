@@ -10,14 +10,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/keshav/transactflow/internal/config"
-	"github.com/keshav/transactflow/internal/domain/product"
-	"github.com/keshav/transactflow/internal/observability"
-	"github.com/keshav/transactflow/internal/queue"
-	pgstore "github.com/keshav/transactflow/internal/store/postgres"
-	rdstore "github.com/keshav/transactflow/internal/store/redis"
-	stripeclient "github.com/keshav/transactflow/internal/stripe"
-	"github.com/keshav/transactflow/internal/worker"
+	"github.com/keshav-077/transactflow/internal/config"
+	"github.com/keshav-077/transactflow/internal/domain/product"
+	"github.com/keshav-077/transactflow/internal/observability"
+	"github.com/keshav-077/transactflow/internal/queue"
+	pgstore "github.com/keshav-077/transactflow/internal/store/postgres"
+	rdstore "github.com/keshav-077/transactflow/internal/store/redis"
+	stripeclient "github.com/keshav-077/transactflow/internal/stripe"
+	"github.com/keshav-077/transactflow/internal/worker"
 )
 
 func main() {

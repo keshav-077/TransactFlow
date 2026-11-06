@@ -13,8 +13,8 @@ import (
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/redis/go-redis/v9"
 
-	"github.com/keshav/transactflow/internal/domain/payment"
-	"github.com/keshav/transactflow/internal/domain/reconciliation"
+	"github.com/keshav-077/transactflow/internal/domain/payment"
+	"github.com/keshav-077/transactflow/internal/domain/reconciliation"
 )
 
 const (

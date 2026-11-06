@@ -11,10 +11,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 
-	"github.com/keshav/transactflow/internal/domain/order"
-	"github.com/keshav/transactflow/internal/domain/product"
-	"github.com/keshav/transactflow/internal/queue"
-	redisstore "github.com/keshav/transactflow/internal/store/redis"
+	"github.com/keshav-077/transactflow/internal/domain/order"
+	"github.com/keshav-077/transactflow/internal/domain/product"
+	"github.com/keshav-077/transactflow/internal/queue"
+	redisstore "github.com/keshav-077/transactflow/internal/store/redis"
 )
 
 const (

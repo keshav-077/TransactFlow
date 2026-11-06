@@ -18,7 +18,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 
-	"github.com/keshav/transactflow/internal/domain/payment"
+	"github.com/keshav-077/transactflow/internal/domain/payment"
 )
 
 // Client is a PaymentProvider backed by the Stripe API.

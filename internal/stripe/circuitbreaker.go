@@ -8,7 +8,7 @@ import (
 
 	"github.com/sony/gobreaker"
 
-	"github.com/keshav/transactflow/internal/domain/payment"
+	"github.com/keshav-077/transactflow/internal/domain/payment"
 )
 
 // circuitBreakerProvider wraps a PaymentProvider with a circuit breaker.

@@ -8,12 +8,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/keshav/transactflow/internal/api"
-	"github.com/keshav/transactflow/internal/config"
-	"github.com/keshav/transactflow/internal/observability"
-	pgstore "github.com/keshav/transactflow/internal/store/postgres"
-	rdstore "github.com/keshav/transactflow/internal/store/redis"
-	stripeclient "github.com/keshav/transactflow/internal/stripe"
+	"github.com/keshav-077/transactflow/internal/api"
+	"github.com/keshav-077/transactflow/internal/config"
+	"github.com/keshav-077/transactflow/internal/observability"
+	pgstore "github.com/keshav-077/transactflow/internal/store/postgres"
+	rdstore "github.com/keshav-077/transactflow/internal/store/redis"
+	stripeclient "github.com/keshav-077/transactflow/internal/stripe"
 )
 
 func main() {

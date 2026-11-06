@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/keshav/transactflow/internal/observability"
+	"github.com/keshav-077/transactflow/internal/observability"
 )
 
 // responseWriter wraps http.ResponseWriter to capture the status code.

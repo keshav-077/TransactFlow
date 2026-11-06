@@ -8,10 +8,10 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/keshav/transactflow/internal/domain/payment"
-	"github.com/keshav/transactflow/internal/domain/reconciliation"
-	"github.com/keshav/transactflow/internal/observability"
-	"github.com/keshav/transactflow/internal/queue"
+	"github.com/keshav-077/transactflow/internal/domain/payment"
+	"github.com/keshav-077/transactflow/internal/domain/reconciliation"
+	"github.com/keshav-077/transactflow/internal/observability"
+	"github.com/keshav-077/transactflow/internal/queue"
 )
 
 const reconcileWorkerGroup = "reconcile-workers"

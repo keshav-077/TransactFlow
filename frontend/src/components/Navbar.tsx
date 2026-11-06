@@ -90,7 +90,7 @@ export function Navbar() {
 
       {/* GitHub */}
       <a
-        href="https://github.com/keshav/transactflow"
+        href="https://github.com/keshav-077/transactflow"
         target="_blank"
         rel="noopener"
         aria-label="View source on GitHub"

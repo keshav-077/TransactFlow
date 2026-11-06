@@ -16,8 +16,8 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/keshav/transactflow/internal/api/middleware"
-	"github.com/keshav/transactflow/internal/domain/user"
+	"github.com/keshav-077/transactflow/internal/api/middleware"
+	"github.com/keshav-077/transactflow/internal/domain/user"
 )
 
 // AuthHandler holds dependencies for the auth endpoints.

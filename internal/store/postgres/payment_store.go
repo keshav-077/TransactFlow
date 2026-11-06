@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/keshav/transactflow/internal/domain/payment"
+	"github.com/keshav-077/transactflow/internal/domain/payment"
 )
 
 // PaymentStore implements payment.Store using PostgreSQL.

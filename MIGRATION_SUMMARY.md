@@ -151,7 +151,7 @@ transactflow/
 
 ## 🔗 Important Links
 
-- **Repository**: https://github.com/keshav/transactflow
+- **Repository**: https://github.com/keshav-077/transactflow
 - **Author**: Keshav
 - **License**: MIT
 - **Tech Stack**: Go, PostgreSQL, Redis, React, Stripe
@@ -161,7 +161,7 @@ transactflow/
 ## 📞 Support
 
 For questions about this migration or the project:
-- GitHub: [@keshav](https://github.com/keshav)
+- GitHub: [@keshav-077](https://github.com/keshav-077)
 - Email: keshav@example.com
 
 ---

@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/keshav/transactflow/internal/insights"
+	"github.com/keshav-077/transactflow/internal/insights"
 )
 
 // InsightsHandler serves AI-generated payment insights to admin users.

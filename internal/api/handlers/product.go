@@ -10,8 +10,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
-	"github.com/keshav/transactflow/internal/domain/product"
-	redisstore "github.com/keshav/transactflow/internal/store/redis"
+	"github.com/keshav-077/transactflow/internal/domain/product"
+	redisstore "github.com/keshav-077/transactflow/internal/store/redis"
 )
 
 // ProductHandler handles HTTP requests for the product catalog.

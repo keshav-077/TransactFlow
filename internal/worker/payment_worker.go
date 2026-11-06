@@ -14,11 +14,11 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 
-	"github.com/keshav/transactflow/internal/domain/order"
-	"github.com/keshav/transactflow/internal/domain/payment"
-	"github.com/keshav/transactflow/internal/observability"
-	"github.com/keshav/transactflow/internal/queue"
-	redisstore "github.com/keshav/transactflow/internal/store/redis"
+	"github.com/keshav-077/transactflow/internal/domain/order"
+	"github.com/keshav-077/transactflow/internal/domain/payment"
+	"github.com/keshav-077/transactflow/internal/observability"
+	"github.com/keshav-077/transactflow/internal/queue"
+	redisstore "github.com/keshav-077/transactflow/internal/store/redis"
 )
 
 const (

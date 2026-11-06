@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/keshav/transactflow/internal/domain/order"
+	"github.com/keshav-077/transactflow/internal/domain/order"
 )
 
 // OrderStore implements order.Store against PostgreSQL.

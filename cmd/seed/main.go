@@ -15,9 +15,9 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/keshav/transactflow/internal/config"
-	"github.com/keshav/transactflow/internal/domain/product"
-	pgstore "github.com/keshav/transactflow/internal/store/postgres"
+	"github.com/keshav-077/transactflow/internal/config"
+	"github.com/keshav-077/transactflow/internal/domain/product"
+	pgstore "github.com/keshav-077/transactflow/internal/store/postgres"
 )
 
 // Demo credentials — also shown on the login page.

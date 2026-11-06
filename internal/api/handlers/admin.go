@@ -11,8 +11,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 
-	"github.com/keshav/transactflow/internal/domain/reconciliation"
-	"github.com/keshav/transactflow/internal/queue"
+	"github.com/keshav-077/transactflow/internal/domain/reconciliation"
+	"github.com/keshav-077/transactflow/internal/queue"
 )
 
 // AdminHandler exposes internal operations for operators and monitoring tools.
