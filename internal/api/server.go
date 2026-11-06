@@ -1,0 +1,183 @@
+// Package api wires together routing, middleware, and handlers into an HTTP server.
+package api
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+
+	"github.com/keshav/transactflow/internal/api/handlers"
+	"github.com/keshav/transactflow/internal/api/middleware"
+	"github.com/keshav/transactflow/internal/config"
+	"github.com/keshav/transactflow/internal/domain/order"
+	"github.com/keshav/transactflow/internal/domain/payment"
+	"github.com/keshav/transactflow/internal/domain/product"
+	"github.com/keshav/transactflow/internal/domain/reconciliation"
+	"github.com/keshav/transactflow/internal/domain/user"
+	"github.com/keshav/transactflow/internal/insights"
+	"github.com/keshav/transactflow/internal/queue"
+	redisstore "github.com/keshav/transactflow/internal/store/redis"
+	"github.com/keshav/transactflow/internal/worker"
+)
+
+// Server wraps the HTTP server and its dependencies.
+type Server struct {
+	httpServer *http.Server
+	logger     *slog.Logger
+}
+
+// NewServer constructs and configures the HTTP server with all routes.
+func NewServer(
+	cfg *config.Config,
+	pool *pgxpool.Pool,
+	rdb *redis.Client,
+	userStore user.Store,
+	productStore product.Store,
+	inventoryStore product.InventoryStore,
+	orderStore order.Store,
+	paymentStore payment.Store,
+	provider payment.PaymentProvider,
+	reconcileStore reconciliation.Store,
+	logger *slog.Logger,
+) *Server {
+	r := chi.NewRouter()
+
+	// Global middleware
+	r.Use(chimiddleware.RequestID)
+	r.Use(chimiddleware.Recoverer)
+	r.Use(middleware.CORS(cfg.AllowedOrigins))
+	r.Use(middleware.Logger(logger))
+
+	productCache := redisstore.NewProductCache(rdb)
+	producer := queue.NewProducer(rdb)
+	authHandler := handlers.NewAuthHandler(userStore, cfg.SessionDuration, logger)
+	productHandler := handlers.NewProductHandler(productStore, inventoryStore, productCache, logger)
+	orderHandler := handlers.NewOrderHandler(orderStore, productStore, inventoryStore, producer, rdb, logger)
+	stripeTestMode := len(cfg.StripeAPIKey) > 8 && cfg.StripeAPIKey[:8] == "sk_test_"
+	paymentHandler := handlers.NewPaymentHandler(paymentStore, orderStore, producer, stripeTestMode, logger)
+	webhookHandler := handlers.NewWebhookHandler(provider, paymentStore, producer, logger)
+	adminHandler := handlers.NewAdminHandler(reconcileStore, producer, rdb, logger)
+	insightsSvc := insights.NewService(paymentStore, reconcileStore, rdb, cfg.AnthropicAPIKey, logger)
+	insightsHandler := handlers.NewInsightsHandler(insightsSvc, logger)
+
+	// Observability
+	r.Get("/health", handlers.Health)
+	r.Get("/ready", handlers.Ready(pool, rdb))
+	// /metrics exposes all Prometheus counters, histograms, and gauges for scraping
+	// by Prometheus or Grafana. Registered automatically via promauto in the observability package.
+	r.Get("/metrics", promhttp.Handler().ServeHTTP)
+
+	// Auth (public)
+	r.Post("/auth/register", authHandler.Register)
+	r.Post("/auth/login", authHandler.Login)
+
+	// Auth (protected)
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.Auth(userStore))
+		r.Post("/auth/logout", authHandler.Logout)
+	})
+
+	// Products (public — reads)
+	r.Get("/products", productHandler.List)
+	r.Get("/products/inventory", productHandler.Inventory) // static route must precede /{id}
+	r.Get("/products/{id}", productHandler.GetByID)
+
+	// Products (admin — writes)
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.Auth(userStore))
+		r.Use(middleware.RequireAdmin)
+		r.Post("/products", productHandler.Create)
+		r.Put("/products/{id}", productHandler.Update)
+		r.Delete("/products/{id}", productHandler.Deactivate)
+		r.Put("/products/{id}/inventory", productHandler.SetInventory)
+	})
+
+	// Orders (authenticated)
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.Auth(userStore))
+		// Order creation is guarded by two independent checks:
+		//   1. Rate limit — per user, 5 req/min. Stops individual clients spamming.
+		//   2. Backpressure — system-wide. If inventory workers are >500 messages
+		//      behind, reject new orders until they catch up. This prevents a burst
+		//      from snowballing into an unbounded queue and degraded fulfilment SLA.
+		r.With(
+			middleware.RateLimit(rdb, "orders:create", 5, time.Minute, middleware.UserIDFromClaims),
+			middleware.Backpressure(rdb, queue.StreamOrdersCreated, worker.InventoryWorkerGroup, 500),
+		).Post("/orders", orderHandler.Create)
+		r.Get("/orders", orderHandler.List)
+		r.Get("/orders/{id}", orderHandler.GetByID)
+		r.Post("/orders/{id}/cancel", orderHandler.Cancel)
+		r.Get("/orders/{id}/events/stream", orderHandler.StreamEvents)
+		r.Get("/orders/{id}/payment", paymentHandler.GetByOrderID)
+		r.Post("/orders/{id}/refunds", paymentHandler.CreateRefund)
+		r.Get("/orders/{id}/refunds", paymentHandler.ListRefunds)
+	})
+
+	// Payments (authenticated)
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.Auth(userStore))
+		r.Get("/payments/{id}", paymentHandler.GetByID)
+	})
+
+	// Webhooks (public — Stripe signs payloads, we validate the signature instead of using auth)
+	// Rate limit by IP: 100 per minute. Stripe sends at most a few events per second in normal
+	// operation; this stops a misconfigured or malicious sender from flooding our queue.
+	r.With(middleware.RateLimit(rdb, "webhooks:stripe", 100, time.Minute, middleware.IPAddress)).
+		Post("/webhooks/stripe", webhookHandler.Handle)
+
+	// Admin routes (authenticated + admin role required)
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.Auth(userStore))
+		r.Use(middleware.RequireAdmin)
+		r.Get("/admin/reconciliation/runs", adminHandler.ListReconciliationRuns)
+		r.Get("/admin/reconciliation/runs/{id}", adminHandler.GetReconciliationRun)
+		r.Post("/admin/reconciliation/trigger", adminHandler.TriggerReconciliation)
+		r.Get("/admin/deadletter", adminHandler.ListDeadLetterMessages)
+		r.Get("/admin/queues", adminHandler.GetQueueDepths)
+		r.Get("/admin/insights", insightsHandler.GetSummary)
+	})
+
+	// otelhttp wraps the entire router so every request automatically gets a
+	// root trace span. The span name is set from the matched route pattern
+	// ("GET /orders/{id}") rather than the raw path, avoiding cardinality issues.
+	handler := otelhttp.NewHandler(r, "payflow-api",
+		otelhttp.WithSpanNameFormatter(func(op string, r *http.Request) string {
+			return r.Method + " " + r.URL.Path
+		}),
+	)
+
+	return &Server{
+		httpServer: &http.Server{
+			Addr:         ":" + cfg.Port,
+			Handler:      handler,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 0, // disabled — SSE connections are long-lived
+			IdleTimeout:  120 * time.Second,
+		},
+		logger: logger,
+	}
+}
+
+// Start begins listening for HTTP requests. It blocks until the server stops.
+func (s *Server) Start() error {
+	s.logger.Info("API server starting", "addr", s.httpServer.Addr)
+	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return fmt.Errorf("server.Start: %w", err)
+	}
+	return nil
+}
+
+// Shutdown gracefully stops the server, waiting up to 10 seconds for in-flight requests.
+func (s *Server) Shutdown(ctx context.Context) error {
+	s.logger.Info("API server shutting down")
+	return s.httpServer.Shutdown(ctx)
+}

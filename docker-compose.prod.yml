@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: transactflow
+      POSTGRES_USER: ${DB_USER:-transactflow}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-transactflow}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --save 60 1
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    image: ghcr.io/alekkyo/transactflow-api:latest
+    env_file: .env
+    environment:
+      # Override the localhost values in .env — containers talk to each other by service name
+      DATABASE_URL: postgres://${DB_USER:-transactflow}:${DB_PASSWORD}@postgres:5432/transactflow?sslmode=disable
+      REDIS_URL: redis://redis:6379
+    ports:
+      # Bind to loopback only — Nginx on the host proxies here. Never expose to 0.0.0.0.
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    image: ghcr.io/alekkyo/transactflow-worker:latest
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://${DB_USER:-transactflow}:${DB_PASSWORD}@postgres:5432/transactflow?sslmode=disable
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
